@@ -41,6 +41,17 @@ public class EnemyGuardBT : BTree
         material = new Material(material);
     }
 
+    private void OnValidate()
+    {
+        if (_player == null)
+            return;
+
+        if (_sight != null)
+            _sight.SetTarget(_player.transform);
+
+        if(_hearing != null)
+            _hearing.SetTarget(_player.transform);
+    }
     protected override Node SetUpTree()
     {
         if (_player == null)
