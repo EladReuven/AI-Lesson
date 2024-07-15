@@ -5,8 +5,8 @@ public class SightSensor : MonoBehaviour, ISensor
 {
     [SerializeField] float _range;
     [SerializeField] float _angle;
+    [SerializeField] Transform _target;
     Vector3 _lastSeenPos;
-    Transform _target;
     protected SensorType _sensorType = SensorType.Sight;
 
     public SensorType GetSensorType => _sensorType;

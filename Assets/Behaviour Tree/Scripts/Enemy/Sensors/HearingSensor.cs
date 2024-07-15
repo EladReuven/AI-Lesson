@@ -5,7 +5,7 @@ using UnityEngine.Events;
 public class HearingSensor : MonoBehaviour, ISensor
 {
     [SerializeField] float _range;
-    Transform _target;
+    [SerializeField] Transform _target;
     Vector3 _lastHeardPos;
     Vector3 _hearingCheckPosition;
     bool _targetEnteredHearingRange = false;

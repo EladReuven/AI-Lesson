@@ -3,7 +3,12 @@
 --- !u!78 &1
 TagManager:
   serializedVersion: 2
-  tags: []
+  tags:
+  - Plane
+  - Rabbit
+  - Bush
+  - Fox
+  - Border
   layers:
   - Default
   - TransparentFX
@@ -12,12 +17,12 @@ TagManager:
   - Water
   - UI
   - Player
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
+  - Fox
+  - Rabbit
+  - Bush
+  - Border
+  - Unwalkable
+  - NormalGround
   - 
   - 
   - 
