@@ -6,64 +6,93 @@ namespace AstarPathfinding
 {
     public class PathfindingUnit : MonoBehaviour
     {
+        const float pathUpdateMoveThreshold = 0.3f;
+        const float minPathUpdateTime = 0.2f;
+
         [SerializeField] private Transform _target;
 
-        float speed = 5f;
-        Vector3[] path;
-        int targetIndex;
+        [SerializeField] float baseSpeed = 5f;
+        [SerializeField] float baseTurnSpeed = 2f;
+        [SerializeField] float turnDist = 5f;
 
-        public Transform Target { get { return _target; } set { _target = value; } }
+        Path path;
 
         private void Start()
         {
-            PathRequestManager.RequestPath(transform.position, _target.position, OnPathFound);
+            StartCoroutine(UpdatePath());
         }
 
-        public void OnPathFound(Vector3[] newPath, bool pathSuccessful)
+        public Transform Target { get { return _target; } set { _target = value; } }
+
+        public void OnPathFound(Vector3[] waypoints, bool pathSuccessful)
         {
             if (pathSuccessful)
             {
-                path = newPath;
+                path = new Path(waypoints, transform.position, turnDist);
                 StopCoroutine("FollowPath");
                 StartCoroutine("FollowPath");
             }
         }
 
-        IEnumerator FollowPath()
+        IEnumerator UpdatePath()
         {
-            Vector3 currenWaypoint = path[0];
+            if (Time.timeSinceLevelLoad < 0.3f)
+                yield return new WaitForSeconds(0.3f);
+
+            PathRequestManager.RequestPath(transform.position, _target.position, OnPathFound);
+
+            float sqrtMoveThreshold = pathUpdateMoveThreshold * pathUpdateMoveThreshold;
+            Vector3 targetPosOld = Target.position;
 
             while (true)
             {
-                if (transform.position == currenWaypoint)
+                yield return new WaitForSeconds(minPathUpdateTime);
+                if ((Target.position - targetPosOld).sqrMagnitude > sqrtMoveThreshold)
                 {
-                    targetIndex++;
-                    if (targetIndex >= path.Length)
-                    {
-                        yield break;
-                    }
-                    currenWaypoint = path[targetIndex];
+                    PathRequestManager.RequestPath(transform.position, _target.position, OnPathFound);
+                    targetPosOld = Target.position;
                 }
-                transform.position = Vector3.MoveTowards(transform.position, currenWaypoint, speed * Time.deltaTime);
+            }
+        }
+
+        IEnumerator FollowPath()
+        {
+            bool followingPath = true;
+            int pathIndex = 0;
+            transform.LookAt(path.lookPoints[0]);
+            float speedPercent = 1;
+            while (followingPath)
+            {
+                Vector2 pos2D = new Vector2(transform.position.x, transform.position.z);
+                while (path.turnBoundaries[pathIndex].HasCrossedLine(pos2D))
+                {
+                    if (pathIndex == path.finishLineIndex)
+                    {
+                        followingPath = false;
+                        break;
+                    }
+                    else
+                        pathIndex++;
+                }
+
+                if (followingPath)
+                {
+                    Quaternion targetRotation = Quaternion.LookRotation(path.lookPoints[pathIndex] - transform.position);
+                    transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, Time.deltaTime * baseTurnSpeed);
+                    transform.Translate(Vector3.forward * Time.deltaTime * baseSpeed * speedPercent, Space.Self);
+                }
                 yield return null;
             }
         }
 
+        static float gizmoLineLength = 5f;
+        static float gizmoCubeSize = 0.3f;
         private void OnDrawGizmos()
         {
             if (path == null)
                 return;
 
-            Gizmos.color = Color.black;
-            for (int i = targetIndex; i < path.Length; i++)
-            {
-                Gizmos.DrawCube(path[i], Vector3.one * 0.3f);
-
-                if (i == targetIndex)
-                    Gizmos.DrawLine(transform.position, path[i]);
-                else
-                    Gizmos.DrawLine(path[i - 1], path[i]);
-            }
+            path.DrawWithGizmos(turnDist, gizmoCubeSize);
         }
     }
 

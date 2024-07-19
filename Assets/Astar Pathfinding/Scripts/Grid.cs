@@ -14,6 +14,8 @@ namespace AstarPathfinding
         [SerializeField] private float _nodeRadius;
         [SerializeField] private TerrainType[] _walkableTerrains;
         [SerializeField] private LayerMask _unwalkableMask;
+        [SerializeField] private int _obstacleProximityPenalty = 10;
+        [SerializeField] private int _penaltyBlurAmount = 2;
 
         private LayerMask _walkableLayerMask;
         Dictionary<int, int> _walkableMaskDictionary = new Dictionary<int, int>();
@@ -58,11 +60,14 @@ namespace AstarPathfinding
                         _walkableMaskDictionary.TryGetValue(hit.collider.gameObject.layer, out movementPenalty);
                     }
 
+                    if (!walkable)
+                        movementPenalty += _obstacleProximityPenalty;
+
                     _grid[x, y] = new Node(walkable, worldPoint, x, y, movementPenalty);
                 }
             }
 
-            BlurPenaltyMap(2);
+            BlurPenaltyMap(_penaltyBlurAmount);
         }
 
         public Node NodeFromWorldPoint(Vector3 worldPosition)
@@ -113,6 +118,8 @@ namespace AstarPathfinding
                     int sampleY = Mathf.Clamp(y, 0, kernelExtents);
                     penaltiesVerticalPass[x, 0] += penaltiesHorizontalPass[x, sampleY];
                 }
+                int blurredPenalty = Mathf.RoundToInt((float)penaltiesVerticalPass[x, 0] / (kernelSize * kernelSize));
+                _grid[x, 0].Penalty = blurredPenalty;
 
                 for (int y = 1; y < GridSizeY; y++)
                 {
@@ -120,8 +127,13 @@ namespace AstarPathfinding
                     int addIndex = Mathf.Clamp(y + kernelExtents, 0, GridSizeY - 1);
 
                     penaltiesVerticalPass[x, y] = penaltiesVerticalPass[x, y - 1] - penaltiesHorizontalPass[x, removeIndex] + penaltiesHorizontalPass[x, addIndex];
-                    int blurredPenalty = Mathf.RoundToInt((float)penaltiesVerticalPass[x, y] / (kernelSize * kernelSize));
+                    blurredPenalty = Mathf.RoundToInt((float)penaltiesVerticalPass[x, y] / (kernelSize * kernelSize));
                     _grid[x, y].Penalty = blurredPenalty;
+
+                    if(blurredPenalty > penaltyMax)
+                        penaltyMax = blurredPenalty;
+                    if(blurredPenalty < penaltyMin)
+                        penaltyMin = blurredPenalty;
                 }
             }
         }
@@ -150,8 +162,14 @@ namespace AstarPathfinding
             return neighborNodes;
         }
 
+        public bool DisplayGridGizmos = true;
+        int penaltyMin = int.MaxValue;
+        int penaltyMax = int.MinValue;
         private void OnDrawGizmos()
         {
+            if (!DisplayGridGizmos)
+                return;
+
             Gizmos.color = Color.white;
             Gizmos.DrawWireCube(transform.position, new Vector3(_gridWorldSize.x, 1, _gridWorldSize.y));
 
@@ -159,9 +177,9 @@ namespace AstarPathfinding
                 return;
             foreach (Node node in _grid)
             {
-                Gizmos.color = node.Walkable ? Color.white : Color.red;
-
-                Gizmos.DrawWireCube(node.WorldPosition, Vector3.one * (NodeDiameter - 0.05f));
+                Gizmos.color = Color.Lerp(Color.white, Color.black, Mathf.InverseLerp(penaltyMin, penaltyMax, node.Penalty));
+                Gizmos.color = node.Walkable ? Gizmos.color : Color.red;
+                Gizmos.DrawCube(node.WorldPosition, Vector3.one * (NodeDiameter));
             }
         }
     }
