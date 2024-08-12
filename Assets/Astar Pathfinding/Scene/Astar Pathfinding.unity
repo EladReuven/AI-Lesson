@@ -882,7 +882,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 51ce14c4ec5ba3041938d8fe3a1b9d06, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _gridWorldSize: {x: 20, y: 20}
+  _gridWorldSize: {x: 30, y: 30}
   _nodeRadius: 0.2
   _walkableTerrains:
   - terrainLayerMask:
@@ -892,13 +892,13 @@ MonoBehaviour:
   - terrainLayerMask:
       serializedVersion: 2
       m_Bits: 16
-    terrainPenalty: 2
+    terrainPenalty: 10
   _unwalkableMask:
     serializedVersion: 2
     m_Bits: 2048
-  _obstacleProximityPenalty: 20
-  _penaltyBlurAmount: 2
-  DisplayGridGizmos: 0
+  _obstacleProximityPenalty: 15
+  _penaltyBlurAmount: 1
+  DisplayGridGizmos: 1
 --- !u!114 &701913004
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -951,7 +951,7 @@ Transform:
   m_GameObject: {fileID: 831411882}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -4.92, y: 0, z: -0.57}
+  m_LocalPosition: {x: -8.17, y: 0.5, z: -2.72}
   m_LocalScale: {x: 0.4, y: 0.4, z: 0.4}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1457,8 +1457,8 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1.9999999, y: 1.9999999, z: 1.9999999}
-  m_ConstrainProportionsScale: 0
+  m_LocalScale: {x: 3, y: 3, z: 3}
+  m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 539569047}
   - {fileID: 1155458815}
@@ -1711,6 +1711,11 @@ PrefabInstance:
       propertyPath: _target
       value: 
       objectReference: {fileID: 831411883}
+    - target: {fileID: 8737104785844114844, guid: 2aab84761438fe941bcbe62ae933f7a0,
+        type: 3}
+      propertyPath: baseSpeed
+      value: 2
+      objectReference: {fileID: 0}
     - target: {fileID: 8737104785844114844, guid: 2aab84761438fe941bcbe62ae933f7a0,
         type: 3}
       propertyPath: stoppingDistance

@@ -360,9 +360,9 @@ public abstract class AnimalScript : MonoBehaviour
             transform.RotateAround(transform.position, transform.up, 180f);
             swapWalkAndTurn();
 
-            // If collides with prey
+            
         }
-        else if (other.gameObject.tag == preyTag)
+        else if (other.gameObject.tag == preyTag) // If collides with prey
         {
             // Increase hunger
             hunger += (int)(other.gameObject.transform.localScale.x * maxHunger);
@@ -381,9 +381,9 @@ public abstract class AnimalScript : MonoBehaviour
             // Actually eat the prey
             Destroy(other.gameObject);
 
-            // If collides with wall
+            
         }
-        else if (other.gameObject.tag == "Border")
+        else if (other.gameObject.tag == "Border") // If collides with wall
         {
             // Turn around and look in random location and move forward
             transform.RotateAround(transform.position, transform.up, 180f);

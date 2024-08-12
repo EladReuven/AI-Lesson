@@ -9,6 +9,9 @@ TagManager:
   - Bush
   - Fox
   - Border
+  - HealthPack
+  - wall
+  - egg
   layers:
   - Default
   - TransparentFX
@@ -24,8 +27,8 @@ TagManager:
   - Unwalkable
   - NormalGround
   - Wall
-  - 
-  - 
+  - Health
+  - Bunny
   - 
   - 
   - 
