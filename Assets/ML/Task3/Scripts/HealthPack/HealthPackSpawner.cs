@@ -13,6 +13,8 @@ namespace FuzzyLogicAndGeneticAlgorithm
         GameObject spawnedHealthPack;
         private float spawnTimer;
         
+        public bool HealthPackAvailable => spawnedHealthPack != null;
+
         void Start()
         {
             spawnTimer = spawnInterval;

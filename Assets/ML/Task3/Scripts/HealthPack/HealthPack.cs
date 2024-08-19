@@ -4,8 +4,11 @@ using UnityEngine;
 
 public class HealthPack : MonoBehaviour
 {
-    private void OnTriggerEnter(Collider other)
-    {
-        Destroy(gameObject);
-    }
+    [SerializeField] int healAmount = 50;
+    public int HealAmount => healAmount;
+
+    //private void OnTriggerEnter(Collider other)
+    //{
+    //    Destroy(gameObject);
+    //}
 }

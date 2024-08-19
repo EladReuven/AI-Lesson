@@ -1,0 +1,60 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &8564776763735357207
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 871600903724318906}
+  - component: {fileID: 8878295412287915357}
+  m_Layer: 0
+  m_Name: GeneticManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &871600903724318906
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8564776763735357207}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &8878295412287915357
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8564776763735357207}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d8ffae4eaeef1ce4ba1375b1b5e63166, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  timeScale: 1
+  groundPlane: {fileID: 0}
+  playerPrefab: {fileID: 4107326528047809749, guid: 9e64fa1705d086949aaa34a259b62a78,
+    type: 3}
+  enemyPrefab: {fileID: 2467872230562249147, guid: 4caa7c036f92803419e379b74f901424,
+    type: 3}
+  healthPackPrefabs: {fileID: 3141547629853767026, guid: 18b4f01a49df80b49b0edf5d56d24c52,
+    type: 3}
+  playerPopulation: 5
+  enemyPopulation: 5
+  timePerGeneration: 30
+  amountOfGenerations: 10
+  amountOfHealthPacks: 2
+  started: 0

@@ -10,6 +10,13 @@ public class EnemyGuardBT : BTree
     public static string LAST_TARGET_POS = "lastTargetPos";
     public static string ALERT_BOOL = "alert";
 
+    [Header("Stats")]
+    public int maxHP = 100;
+    public int currentHP = 100;
+    [Header("Stat Limits")]
+    public int lowHP = 30;
+    public int damageToTake = 10;
+
     [Header("Navigating")]
     [SerializeField] protected NavMeshAgent _agent;
     [SerializeField] Transform[] _waypoints;
@@ -49,7 +56,7 @@ public class EnemyGuardBT : BTree
         if (_sight != null)
             _sight.SetTarget(_player.transform);
 
-        if(_hearing != null)
+        if (_hearing != null)
             _hearing.SetTarget(_player.transform);
     }
     protected override Node SetUpTree()
@@ -69,18 +76,21 @@ public class EnemyGuardBT : BTree
         {
             new Sequence(new List<Node> //check if can See player, if yes, become alert and chase
             {
+                new Condition(() => currentHP > lowHP),
                 new Condition(() => _sight.CheckForTarget()),
                 new BTAction(() => alert = true),
                 new BTAction(Chase),
             }),
             new Sequence(new List<Node> //checks if can Hear player, if yes become alert
             {
+                new Condition(() => currentHP > lowHP),
                 new Condition(() => _hearing.CheckForTarget()),
                 new BTAction(() => alert = true),
                 new BTAction(Search),
             }),
             new Sequence(new List<Node> //if alert, Search
             {
+                new Condition(() => currentHP > lowHP),
                 new Condition(() => alert),
                 new BTAction(Search),
             }),
@@ -115,6 +125,11 @@ public class EnemyGuardBT : BTree
 
     }
 
+    [ContextMenu("Take Damage")]
+    public void DamageAgent()
+    {
+        currentHP -= damageToTake;
+    }
 
     private void OnDrawGizmos()
     {

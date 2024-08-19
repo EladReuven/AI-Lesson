@@ -1239,6 +1239,11 @@ PrefabInstance:
       propertyPath: _range
       value: 5.5
       objectReference: {fileID: 0}
+    - target: {fileID: 5802792745710431625, guid: aab46bba773e2204ba90067c9132bc2d,
+        type: 3}
+      propertyPath: _target
+      value: 
+      objectReference: {fileID: 3543190068741465248}
     - target: {fileID: 6788054753972367891, guid: aab46bba773e2204ba90067c9132bc2d,
         type: 3}
       propertyPath: _sight
@@ -1360,6 +1365,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _range: 8
   _angle: 60
+  _target: {fileID: 3543190068741465248}
   OnLastPositionUpdated:
     m_PersistentCalls:
       m_Calls: []
@@ -1616,6 +1622,12 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!4 &3543190068741465248 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 208954443158793323, guid: 2e7db8a8a0aa36e41b9b06fde2345afd,
+    type: 3}
+  m_PrefabInstance: {fileID: 3543190068741465238}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &5050126702358613828
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1629,6 +1641,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: DownEnemyGuard
       objectReference: {fileID: 0}
+    - target: {fileID: 5802792745710431625, guid: aab46bba773e2204ba90067c9132bc2d,
+        type: 3}
+      propertyPath: _target
+      value: 
+      objectReference: {fileID: 3543190068741465248}
     - target: {fileID: 6788054753972367891, guid: aab46bba773e2204ba90067c9132bc2d,
         type: 3}
       propertyPath: _player
@@ -1639,6 +1656,11 @@ PrefabInstance:
       propertyPath: material
       value: 
       objectReference: {fileID: 2100000, guid: 9f29deb55fcde514eb2fa6e9fb981688, type: 2}
+    - target: {fileID: 6788054753972367891, guid: aab46bba773e2204ba90067c9132bc2d,
+        type: 3}
+      propertyPath: damageToTake
+      value: 40
+      objectReference: {fileID: 0}
     - target: {fileID: 6788054753972367891, guid: aab46bba773e2204ba90067c9132bc2d,
         type: 3}
       propertyPath: _waypoints.Array.size
@@ -1704,6 +1726,11 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 8911113508725198289, guid: aab46bba773e2204ba90067c9132bc2d,
+        type: 3}
+      propertyPath: _target
+      value: 
+      objectReference: {fileID: 3543190068741465248}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

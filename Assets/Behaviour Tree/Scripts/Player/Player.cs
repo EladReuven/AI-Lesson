@@ -52,4 +52,6 @@ public class Player : MonoBehaviour
             rb.velocity = Vector3.MoveTowards(currentVelocity, Vector3.zero, deceleration * Time.fixedDeltaTime);
         }
     }
+
+
 }

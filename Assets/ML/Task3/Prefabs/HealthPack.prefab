@@ -97,7 +97,7 @@ GameObject:
   - component: {fileID: 336068996136907618}
   m_Layer: 14
   m_Name: HealthPack
-  m_TagString: Untagged
+  m_TagString: HealthPack
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -153,6 +153,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c2c12bae99ba6a047b47b6ccbde085fc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  healAmount: 50
 --- !u!65 &336068996136907618
 BoxCollider:
   m_ObjectHideFlags: 0
