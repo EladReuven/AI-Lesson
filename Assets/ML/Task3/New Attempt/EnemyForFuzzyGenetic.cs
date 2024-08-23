@@ -33,6 +33,9 @@ namespace FuzzyLogicAndGeneticAlgorithm
 
         void Update()
         {
+            if (!GeneticManager.instance.started)
+                return;
+
             if (waiting) return;
 
             if (timer < lookForTargetInterval)
@@ -105,7 +108,6 @@ namespace FuzzyLogicAndGeneticAlgorithm
         void LookForTarget()
         {
             Collider[] colliders = Physics.OverlapSphere(transform.position, viewRadius, targetPlayerLayer);
-            print(colliders.Length);
             if (colliders.Length == 0)
             {
                 hasTarget = false;

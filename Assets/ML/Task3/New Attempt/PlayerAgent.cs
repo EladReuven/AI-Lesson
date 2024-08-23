@@ -1,9 +1,11 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using Unity.VisualScripting;
 using UnityEditor;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 namespace FuzzyLogicAndGeneticAlgorithm
 {
@@ -27,21 +29,24 @@ namespace FuzzyLogicAndGeneticAlgorithm
         float decisionValue;
 
 
-
         Vector3 targetLocation;
         bool dead = false;
         public bool Dead => dead;
+        public FitnessStats FitnessStats => fitnessStats;
+        public float[] Weights => weights;
 
         private void Start()
         {
-            currentHealth = maxHealth;
             InitializeWeights();
-            GetRandomTargetLocation();
+            ResetStats();
         }
 
         private void Update()
         {
-            if(dead) return;
+            if (!GeneticManager.instance.started)
+                return;
+
+            if (dead) return;
 
             fitnessStats.timeSurvived += Time.deltaTime;
             float healthStatus = EvaluateHealth(currentHealth);
@@ -59,9 +64,27 @@ namespace FuzzyLogicAndGeneticAlgorithm
             if (!other.gameObject.CompareTag("HealthPack"))
                 return;
 
-            Heal(other.GetComponent<HealthPack>().HealAmount);
+            HealthPack healthPack = other.GetComponent<HealthPack>();
+            if(healthPack == null) return;
+
+            //how much of the heal amount was used without overflowing.
+            float hpBeforeHeal = currentHealth;
+            Heal(healthPack.HealAmount);
+            float percentHealUsed = (currentHealth - hpBeforeHeal)/healthPack.HealAmount;
+            fitnessStats.healthPacksUsed++;
+            CalculateHealthpackEfficiency(percentHealUsed);
             Destroy(other.gameObject);
 
+        }
+
+        void CalculateHealthpackEfficiency(float percentOfHealUsed)
+        {
+            //all heals used/total used
+
+            //total sum + new number 
+            fitnessStats.healthPackEfficiency += percentOfHealUsed;
+            //divide by amount of healthpacks
+            fitnessStats.healthPackEfficiency /= fitnessStats.healthPacksUsed;
         }
 
         float EvaluateHealth(int health)
@@ -116,6 +139,22 @@ namespace FuzzyLogicAndGeneticAlgorithm
             }
         }
 
+        /// <summary>
+        /// set new weights based by crossing over 2 parent agents' weights.
+        /// </summary>
+        /// <param name="partner1"></param>
+        /// <param name="partner2"></param>
+        public void CrossoverWeights(PlayerAgent partner1, PlayerAgent partner2)
+        {
+            int crossoverPoint = Random.Range(0, weights.Length);
+
+            for(int i = 0; i < weights.Length; i++)
+            {
+                weights[i] = i < crossoverPoint ? partner1.Weights[i] : partner2.Weights[i];
+            }
+        }
+
+
         float MakeDecision(float healthStatus, float enemyProximity, float healthPackProximity)
         {
             // Weights that determine the influence of each factor
@@ -155,7 +194,7 @@ namespace FuzzyLogicAndGeneticAlgorithm
             if (currentHealth < 0)
             {
                 dead = true;
-                Destroy(gameObject);
+                KillPlayer();
             }
         }
 
@@ -180,8 +219,26 @@ namespace FuzzyLogicAndGeneticAlgorithm
 
             targetLocation = new Vector3(Random.Range(minX, maxX), transform.position.y, Random.Range(minZ, maxZ));
         }
+
+        public void KillPlayer()
+        {
+            fitnessStats.CalculateTotalFitness();
+            //send player fitness and weights to geneticManager
+            //GeneticManager.instance.OnPlayerDeath.Invoke(fitnessStats.totalFitness, weights);
+            
+            gameObject.SetActive(false);
+        }
+
+        public void ResetStats()
+        {
+            currentHealth = maxHealth;
+            fitnessStats.InitializeFitness();
+            GetRandomTargetLocation();
+        }
+
     }
 
+    [Serializable]
     public struct FitnessStats
     {
         public float totalFitness;
@@ -189,6 +246,22 @@ namespace FuzzyLogicAndGeneticAlgorithm
         public float timeSurvived;
         public int healthPacksUsed; //amount of packs picked up
         public float healthPackEfficiency; //how much of the heal was converted to hp without overflowing
-        public float distanceTraveled; 
+
+        public void InitializeFitness()
+        {
+            totalFitness = 0f;
+            timeSurvived = 0f;
+            healthPacksUsed = 0;
+            healthPackEfficiency = 0f;
+        }
+
+        public void CalculateTotalFitness()
+        {
+            totalFitness = 0f;
+
+            totalFitness += timeSurvived;
+            totalFitness += healthPacksUsed * 10f;
+            totalFitness += healthPackEfficiency * 100f;
+        }
     }
 }
