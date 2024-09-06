@@ -31,6 +31,11 @@ namespace FuzzyLogicAndGeneticAlgorithm
 
         Vector3 patrolLocation;
 
+        private void Start()
+        {
+            GetRandomPatrolLocation();
+        }
+
         void Update()
         {
             if (!GeneticManager.instance.started)

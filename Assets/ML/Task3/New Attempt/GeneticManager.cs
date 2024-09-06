@@ -94,17 +94,32 @@ namespace FuzzyLogicAndGeneticAlgorithm
                 players.Sort((agent1, agent2) => agent2.FitnessStats.totalFitness.CompareTo(agent1.FitnessStats.totalFitness));
                 print("starting new generation: " + currentGeneration);
                 //mutate stuff
-                EvolvePlayers();
+                //collect weights from top players
+                List<float[]> topWeights = new();
+                int amountOfTopAgents = Mathf.FloorToInt((float)players.Count * topPercentOfPlayers);
+                print("Top Weights: ");
+                for (int i = 0; i <= amountOfTopAgents; i++)
+                {
+                    topWeights.Add(players[i].Weights);
+                    print(players[i].Weights[0] + ", " + players[i].Weights[1] + ", " + players[i].Weights[2]);
+                }
+                
 
-
-                //respawn everything except for health packs
-                //reset Players
+                //Destroy old players and replace with new players.
                 foreach (var p in players)
                 {
-                    p.transform.position = GetRandomLocationOnGround(p.transform.position.y);
-                    p.ResetStats();
-                    p.gameObject.SetActive(true);
+                    Destroy(p.gameObject);
                 }
+                players.Clear();
+
+
+                //List<PlayerAgent> newPlayers = new();
+
+                
+                //respawn everything except for health packs
+                //create new players based on evolved weights
+                CreateEvolvedPlayers(topWeights);
+                
                 //reset enemies
                 EnemyForFuzzyGenetic[] enemiesArray = enemies.ToArray();
                 foreach (var e in enemiesArray)
@@ -122,42 +137,48 @@ namespace FuzzyLogicAndGeneticAlgorithm
             }
         }
 
-        void EvolvePlayers()
+        void CreateEvolvedPlayers(List<float[]> topWeights)
         {
-            List<PlayerAgent> newPlayers = new();
+            //List<PlayerAgent> EvolvedPlayers = new();
             for (int i = 0; i < playerPopulation; i++)
             {
-                //get 2 parents
-                PlayerAgent parent1 = SelectParent();
-                PlayerAgent parent2 = SelectParent();
+                //create new player
+                PlayerAgent newAgent = CreatePlayer();
 
-                //set the weights of player based on parents crossover
-                players[i].CrossoverWeights(parent1, parent2);
-                MutatePlayer(players[i]);
+                //set weights from top weights list
+                int randTopWeight1 = Random.Range(0, topWeights.Count);
+                int randTopWeight2 = Random.Range(0, topWeights.Count);
+                newAgent.CrossoverWeights(topWeights[randTopWeight1], topWeights[randTopWeight2]);
+                
+                //mutate weights based on chance
+                newAgent.SetWeights(MutateWeights(newAgent.Weights));
+
             }
         }
 
-        PlayerAgent SelectParent()
+        PlayerAgent SelectFitAgent()
         {
             //select random parent from top of list
             return players[Random.Range(0, Mathf.CeilToInt((float)players.Count * topPercentOfPlayers))];
         }
 
-        public void MutatePlayer(PlayerAgent agent)
+        public float[] MutateWeights(float[] weightsToMutate)
         {
-            for (int i = 0; i < agent.Weights.Length; i++)
+            float[] newWeights = weightsToMutate;
+            for (int i = 0; i < weightsToMutate.Length; i++)
             {
                 // Check if this weight should mutate based on the mutation rate
                 if (Random.value <= mutationRate)
                 {
                     // Apply Gaussian mutation
                     float mutation = Random.Range(-mutationAmount, mutationAmount);
-                    agent.Weights[i] += mutation;
+                    newWeights[i] += mutation;
 
                     // Clamp the mutated weight to keep it within a valid range (0 to 1)
-                    agent.Weights[i] = Mathf.Clamp(agent.Weights[i], 0f, 1f);
+                    newWeights[i] = Mathf.Clamp(newWeights[i], 0f, 1f);
                 }
             }
+            return newWeights;
         }
 
         void InitializeScene()
@@ -177,10 +198,23 @@ namespace FuzzyLogicAndGeneticAlgorithm
             //spawn players
             for (int i = 0; i < playerPopulation; i++)
             {
-                PlayerAgent player = Instantiate(playerPrefab, GetRandomLocationOnGround(playerPrefab.transform.position.y), Quaternion.identity, transform);
-                player.groundPlane = groundPlane;
-                players.Add(player);
+                PlayerAgent player = CreatePlayer();
+                player.InitializeWeights();
             }
+        }
+
+        private PlayerAgent CreatePlayer()
+        {
+            PlayerAgent player = Instantiate(playerPrefab, GetRandomLocationOnGround(playerPrefab.transform.position.y), Quaternion.identity, transform);
+            player.groundPlane = groundPlane;
+            players.Add(player);
+            return player;
+        }
+        private PlayerAgent CreatePlayer(PlayerAgent newPlayerAgent)
+        {
+            PlayerAgent player = Instantiate(newPlayerAgent, GetRandomLocationOnGround(playerPrefab.transform.position.y), Quaternion.identity, transform);
+            player.groundPlane = groundPlane;
+            return player;
         }
 
         private void CreateEnemy()

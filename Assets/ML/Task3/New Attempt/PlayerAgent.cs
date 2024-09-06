@@ -11,6 +11,9 @@ namespace FuzzyLogicAndGeneticAlgorithm
 {
     public class PlayerAgent : MonoBehaviour
     {
+        static int GlobalID = 0;
+        public int agentID;
+
         public MeshFilter groundPlane;
 
         [Header("Player Stats")]
@@ -20,7 +23,7 @@ namespace FuzzyLogicAndGeneticAlgorithm
         [SerializeField] LayerMask healthPackLayer;
 
         [Header("Fuzzy Logic Affected by Genetic Algorithm")]
-        [SerializeField][Range(0f,1f)] float healthPackPriority = 0.5f;
+        [SerializeField][Range(0f, 1f)] float healthPackPriority = 0.5f;
         [SerializeField] float[] weights; // 0 - healthLow Weight, 1 - enemy Near weight , 2 - healthpack near weight
         [SerializeField] FitnessStats fitnessStats;
 
@@ -37,7 +40,7 @@ namespace FuzzyLogicAndGeneticAlgorithm
 
         private void Start()
         {
-            InitializeWeights();
+            agentID = ++GlobalID;
             ResetStats();
         }
 
@@ -57,7 +60,7 @@ namespace FuzzyLogicAndGeneticAlgorithm
             ApplyDecision(decisionValue);
         }
 
-        
+
 
         private void OnTriggerEnter(Collider other)
         {
@@ -65,12 +68,12 @@ namespace FuzzyLogicAndGeneticAlgorithm
                 return;
 
             HealthPack healthPack = other.GetComponent<HealthPack>();
-            if(healthPack == null) return;
+            if (healthPack == null) return;
 
             //how much of the heal amount was used without overflowing.
             float hpBeforeHeal = currentHealth;
             Heal(healthPack.HealAmount);
-            float percentHealUsed = (currentHealth - hpBeforeHeal)/healthPack.HealAmount;
+            float percentHealUsed = (currentHealth - hpBeforeHeal) / healthPack.HealAmount;
             fitnessStats.healthPacksUsed++;
             CalculateHealthpackEfficiency(percentHealUsed);
             Destroy(other.gameObject);
@@ -95,10 +98,10 @@ namespace FuzzyLogicAndGeneticAlgorithm
         float EvaluateEnemyProximity()
         {
             float shortestDistance = Mathf.Infinity;
-            foreach(var e in GeneticManager.instance.Enemies)
+            foreach (var e in GeneticManager.instance.Enemies)
             {
                 float distanceToEnemy = Vector3.Distance(transform.position, e.transform.position);
-                if(distanceToEnemy < shortestDistance)
+                if (distanceToEnemy < shortestDistance)
                 {
                     shortestDistance = distanceToEnemy;
                     closestEnemy = e;
@@ -128,9 +131,9 @@ namespace FuzzyLogicAndGeneticAlgorithm
             return 1 / shortestDistance; //the closer the hp pack, the higher the number
         }
 
-        
 
-        void InitializeWeights()
+
+        public void InitializeWeights()
         {
             weights = new float[3]; // Example: 3 weights
             for (int i = 0; i < weights.Length; i++)
@@ -144,14 +147,23 @@ namespace FuzzyLogicAndGeneticAlgorithm
         /// </summary>
         /// <param name="partner1"></param>
         /// <param name="partner2"></param>
-        public void CrossoverWeights(PlayerAgent partner1, PlayerAgent partner2)
+        public void CrossoverWeights(float[] weights1, float[] weights2)
         {
+            // pick random cut off point
             int crossoverPoint = Random.Range(0, weights.Length);
+            // create new weights 
+            float[] crossoverWeights = new float[weights.Length];
 
-            for(int i = 0; i < weights.Length; i++)
+            //assign new weights depending on cut off point
+            for (int i = 0; i < weights.Length; i++)
             {
-                weights[i] = i < crossoverPoint ? partner1.Weights[i] : partner2.Weights[i];
+                Weights[i] = i < crossoverPoint ? weights1[i] : weights2[i];
             }
+
+            ////return new agent with new weights
+            //PlayerAgent newAgent = new();
+            //newAgent.SetWeights(crossoverWeights);
+            //return newAgent;
         }
 
 
@@ -225,8 +237,13 @@ namespace FuzzyLogicAndGeneticAlgorithm
             fitnessStats.CalculateTotalFitness();
             //send player fitness and weights to geneticManager
             //GeneticManager.instance.OnPlayerDeath.Invoke(fitnessStats.totalFitness, weights);
-            
+
             gameObject.SetActive(false);
+        }
+
+        public void SetWeights(float[] newWeights)
+        {
+            weights = newWeights;
         }
 
         public void ResetStats()

@@ -12,6 +12,8 @@ TagManager:
   - HealthPack
   - wall
   - egg
+  - Animal
+  - Water
   layers:
   - Default
   - TransparentFX
@@ -29,7 +31,7 @@ TagManager:
   - Wall
   - Health
   - Bunny
-  - 
+  - Dragon
   - 
   - 
   - 

@@ -2,8 +2,9 @@
 
 public class NeuralNetWithCopyMono : MonoBehaviour
 {
-
-    int [] networkShape = {6,4,4,2};
+    public int inputAmount = 7;
+    public int outputAmount = 4;
+    int[] networkShape; 
     public Layer [] layers;
 
     // Awake is called when the script instance is being loaded.
@@ -11,6 +12,7 @@ public class NeuralNetWithCopyMono : MonoBehaviour
     // Awake gets called before Start which is why we use Awake here
     public void Awake()
     {
+        networkShape = new int[] { inputAmount,4,4, outputAmount};
         layers = new Layer[networkShape.Length - 1];
 
         for(int i = 0; i < layers.Length; i++)
@@ -20,6 +22,9 @@ public class NeuralNetWithCopyMono : MonoBehaviour
 
         //This ensures that the random numbers we generate aren't the same pattern each time. 
         Random.InitState((int)System.DateTime.Now.Ticks);
+
+        //init weights
+        
     }
 
     //This function is used to feed forward the inputs through the network, and return the output, which is the decision of the network, in this case, the direction to move in.
@@ -79,6 +84,12 @@ public class NeuralNetWithCopyMono : MonoBehaviour
             biasesArray = new float[n_neurons];
         }
 
+        void InitializeWeightsAndBiases()
+        {
+            //go over all neurons and inupts
+            //give them all a random init number from 0-1
+        }
+
         //forward pass, takes in an array of inputs and returns an array of outputs, which is then used as the input for the next layer, and so on, until we get to the output layer, which is returned as the output of the network.
         public void Forward(float [] inputsArray)
         {
@@ -110,17 +121,17 @@ public class NeuralNetWithCopyMono : MonoBehaviour
             // }
 
 
-            // //sigmoid function
-            // for(int i = 0; i < nodeArray.Length; i++)
-            // {
-            //     nodeArray[i] = 1/(1 + Mathf.Exp(-nodeArray[i]));
-            // }
-
-            //tanh function
+            //sigmoid function
             for (int i = 0; i < nodeArray.Length; i++)
             {
-                nodeArray[i] = (float)System.Math.Tanh(nodeArray[i]);
+                nodeArray[i] = 1 / (1 + Mathf.Exp(-nodeArray[i]));
             }
+
+            //tanh function
+            //for (int i = 0; i < nodeArray.Length; i++)
+            //{
+            //    nodeArray[i] = (float)System.Math.Tanh(nodeArray[i]);
+            //}
 
             //relu function
             //for (int i = 0; i < nodeArray.Length; i++)
