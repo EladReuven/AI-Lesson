@@ -6,38 +6,41 @@ public class DragonController : MonoBehaviour
 {
     public Transform target;
     public float flapTimeInterval = 1f;
-    public float wingFlapStrength = 10f;
-    public float tailMovementStrength = 10f;
+    public float wingFlapStrength = 100f;
+    public float tailMovementStrength = 50f;
 
 
     private NeuralNetWithCopyMono neuralNetwork;
     private Rigidbody rb;
     float flapTimer = 0f;
+    bool dead = false;
+    [SerializeField] float fitness = 0f;
+    public float Fitness => fitness;
+    public bool Dead => dead;
+    public NeuralNetWithCopyMono NN => neuralNetwork;
 
-    public float Fitness { get; private set; }
+    public float distanceFitnessWeight = 10f;
+    public float orientationFitnessWeight = 2f;
+    public float angularVelFitnessPenaltyWeight = 5f;
 
-    //left wing right wing
-    //both = transform.forward + transform.up
-    //if unbalanced then torque in direction of bigger one on z axis
-    //tail x = torque y axis
-    //tail y = torque x axis
-
-    //each output should be a number between 0 - 1
-    //output for wings will be (output divided by 2) * strength of flap
-    //output for tail will be (output * 2 - 1) * strength of flap
-
-    //inputs are - distance to target.
-    //transform position
-    //velocity
-    //MAAAYYYYBE also distance from walls
-
-    //fitness maybe remove points for touching obstacle or for being upside down.
+    private float timeAlive = 0f;
+    private float distanceToTargetAtStart;
+    private float orientationScore = 0f;
+    private float angularVelocityPenalty = 0f;
+    private float collisionPenalty = 0f;
 
     private void Awake()
     {
+        fitness = 0f;
         rb = GetComponent<Rigidbody>();
         neuralNetwork = GetComponent<NeuralNetWithCopyMono>();
-        
+
+    }
+
+    public void SetTarget(Transform T)
+    {
+        target = T;
+        distanceToTargetAtStart = Vector3.Distance(transform.position, target.position);
     }
 
     public void FlapWings(float leftStrength, float rightStrength)
@@ -53,6 +56,10 @@ public class DragonController : MonoBehaviour
 
     void Update()
     {
+        if (dead) return;
+
+        timeAlive += Time.deltaTime;
+
         flapTimer += Time.deltaTime;
 
         if (flapTimer > flapTimeInterval)
@@ -92,15 +99,45 @@ public class DragonController : MonoBehaviour
             Vector3 rollTorque = transform.forward * horizontalRotationalForce;
             rb.AddTorque(rollTorque);
 
-            //// Adjust velocity to match the current forward direction, preserving speed
-            //Vector3 currentVelocity = rb.velocity;
-            //Vector3 newVelocityDirection = Vector3.Lerp(currentVelocity.normalized, transform.forward, turnDamping);
-            //rb.velocity = newVelocityDirection * currentVelocity.magnitude;
         }
 
-        // Update fitness score (inverse of distance to target)
-        Fitness = 1 / Vector3.Distance(transform.position, target.position);
+        // Update fitness
+        UpdateFitness();
     }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (collision.gameObject.tag == "Plane" || collision.gameObject.tag == "Obstacle")
+        {
+            collisionPenalty += 10f; // Penalize heavily for hitting walls or ground
+            Die();
+        }
+    }
+
+    private void UpdateFitness()
+    {
+        // Time Alive boosts fitness
+        float timeAliveFactor = timeAlive;
+
+        // Distance to Target: the closer the better
+        float distanceFactor = 1f - (Vector3.Distance(transform.position, target.position) / distanceToTargetAtStart);
+
+        // Reward when the dragon's "up" is pointing towards the sky
+        if (Vector3.Dot(transform.up, Vector3.up) > 0.1f) // Dot product close to 1 means it's oriented correctly
+        {
+            orientationScore += Time.deltaTime;
+        }
+
+        // Angular Velocity: penalize if spinning too fast
+        if (rb.angularVelocity.magnitude > 1f) // Threshold for excessive spinning
+        {
+            angularVelocityPenalty += Time.deltaTime;
+        }
+
+        // Total Fitness Calculation
+        fitness = timeAliveFactor + (distanceFactor * distanceFitnessWeight) + (orientationScore * orientationFitnessWeight) - (angularVelocityPenalty * angularVelFitnessPenaltyWeight) - collisionPenalty;
+    }
+
 
     private float[] GetInputs()
     {
@@ -131,11 +168,21 @@ public class DragonController : MonoBehaviour
 
     public void Die()
     {
+        if (dead) return;
+        dead = true;
         //calculate fitness
+        UpdateFitness();
         //save neural network somehow
+
         //reproduce.
+
     }
 
+    public void MutateDragon()
+    {
+        if (Random.Range(0f, 1f) <= NN.dragonMutateChance)
+            NN.MutateNetwork(NN.mutationAmount, NN.mutationChance);
+    }
 
     [ContextMenu("TestFlapWings")]
     public void TestFlapWings()

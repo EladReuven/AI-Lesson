@@ -377,9 +377,9 @@ GameObject:
   - component: {fileID: 450031095}
   - component: {fileID: 450031094}
   - component: {fileID: 450031093}
-  m_Layer: 0
+  m_Layer: 12
   m_Name: Plane
-  m_TagString: Untagged
+  m_TagString: Plane
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -544,6 +544,7 @@ GameObject:
   m_Component:
   - component: {fileID: 887573039}
   - component: {fileID: 887573038}
+  - component: {fileID: 887573040}
   m_Layer: 0
   m_Name: Managers
   m_TagString: Untagged
@@ -568,7 +569,7 @@ MonoBehaviour:
   obstaclePrefab: {fileID: 301693799}
   targetLocation: {fileID: 877555282}
   spawnXYZ: 10
-  amountOfDragons: 5
+  amountOfDragons: 100
   amountOfObstacles: 20
 --- !u!4 &887573039
 Transform:
@@ -585,6 +586,21 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &887573040
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 887573037}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3c23e9deb1ebe0f46b089e3cf1de934c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  dragons: []
+  generationTime: 20
+  topPercentFromList: 0.2
 --- !u!1 &1274689054
 GameObject:
   m_ObjectHideFlags: 0

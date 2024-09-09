@@ -14,6 +14,7 @@ TagManager:
   - egg
   - Animal
   - Water
+  - Obstacle
   layers:
   - Default
   - TransparentFX
