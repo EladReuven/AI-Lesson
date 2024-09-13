@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using static UnityEngine.UI.Image;
 
 public class DragonController : MonoBehaviour
 {
@@ -22,6 +23,10 @@ public class DragonController : MonoBehaviour
     public float distanceFitnessWeight = 10f;
     public float orientationFitnessWeight = 2f;
     public float angularVelFitnessPenaltyWeight = 5f;
+    public float objectDetectionSphereRadius = 10f;
+    public LayerMask obstacleLayer;
+    public LayerMask groundLayer;
+    public float maxGroundCheckDistance = 100f;
 
     private float timeAlive = 0f;
     private float distanceToTargetAtStart;
@@ -36,24 +41,6 @@ public class DragonController : MonoBehaviour
         neuralNetwork = GetComponent<NeuralNetWithCopyMono>();
 
     }
-
-    public void SetTarget(Transform T)
-    {
-        target = T;
-        distanceToTargetAtStart = Vector3.Distance(transform.position, target.position);
-    }
-
-    public void FlapWings(float leftStrength, float rightStrength)
-    {
-        //adds impulse force upwards and forward
-        Vector3 upForwardForce = transform.forward + transform.up;
-        rb.AddForce(upForwardForce * (leftStrength + rightStrength), ForceMode.Impulse);
-
-        //adds rotational force depending on what is stronger.
-        float rotationalForce = rightStrength - leftStrength;
-        rb.AddTorque(Vector3.forward * rotationalForce, ForceMode.Impulse);
-    }
-
     void Update()
     {
         if (dead) return;
@@ -104,7 +91,6 @@ public class DragonController : MonoBehaviour
         // Update fitness
         UpdateFitness();
     }
-
     private void OnCollisionEnter(Collision collision)
     {
         if (collision.gameObject.tag == "Plane" || collision.gameObject.tag == "Obstacle")
@@ -113,6 +99,25 @@ public class DragonController : MonoBehaviour
             Die();
         }
     }
+
+    public void SetTarget(Transform T)
+    {
+        target = T;
+        distanceToTargetAtStart = Vector3.Distance(transform.position, target.position);
+    }
+
+    public void FlapWings(float leftStrength, float rightStrength)
+    {
+        //adds impulse force upwards and forward
+        Vector3 upForwardForce = transform.forward + transform.up;
+        rb.AddForce(upForwardForce * (leftStrength + rightStrength), ForceMode.Impulse);
+
+        //adds rotational force depending on what is stronger.
+        float rotationalForce = rightStrength - leftStrength;
+        rb.AddTorque(Vector3.forward * rotationalForce, ForceMode.Impulse);
+    }
+
+
 
     private void UpdateFitness()
     {
@@ -138,7 +143,6 @@ public class DragonController : MonoBehaviour
         fitness = timeAliveFactor + (distanceFactor * distanceFitnessWeight) + (orientationScore * orientationFitnessWeight) - (angularVelocityPenalty * angularVelFitnessPenaltyWeight) - collisionPenalty;
     }
 
-
     private float[] GetInputs()
     {
         Vector3 relativePosition = target.position - transform.position;
@@ -157,13 +161,57 @@ public class DragonController : MonoBehaviour
             //Velocity x, y, z
             rb.velocity.x,
             rb.velocity.y,
-            rb.velocity.z
+            rb.velocity.z,
+
+            //distance from nearest obstacle
+            DetectObstacle(),
+
+            //distance from ground
+            DistanceFromGround()
 
 
-            //total of 7 inputs currently
+            //total of 9 inputs currently
         };
 
         return inputs;
+    }
+
+    public float DistanceFromGround()
+    {
+        RaycastHit hit;
+
+        // Cast a ray straight down from the object's position
+        if (Physics.Raycast(transform.position, Vector3.down, out hit, maxGroundCheckDistance, groundLayer))
+        {
+            // Check if the hit object is on the "Ground" layer or tagged as "Ground"
+            if (hit.collider.CompareTag("Ground") || ((1 << hit.collider.gameObject.layer) & groundLayer) != 0)
+            {
+                return hit.distance;
+            }
+        }
+
+        return -1f;  // Return -1 if no ground is found
+    }
+
+    public float DetectObstacle()
+    {
+        Collider[] hits = Physics.OverlapSphere(transform.position, objectDetectionSphereRadius, obstacleLayer);
+        float nearestDistance = Mathf.Infinity;  // Store the distance to the nearest obstacle
+
+        foreach (Collider hit in hits)
+        {
+            if (hit.CompareTag("Obstacle"))
+            {
+                float distance = Vector3.Distance(transform.position, hit.transform.position);
+                if (distance < nearestDistance)
+                {
+                    nearestDistance = distance;
+                }
+            }
+        }
+
+        // If no obstacles found, return -1
+        return nearestDistance == Mathf.Infinity ? -1f : nearestDistance;
     }
 
     public void Die()
@@ -172,9 +220,6 @@ public class DragonController : MonoBehaviour
         dead = true;
         //calculate fitness
         UpdateFitness();
-        //save neural network somehow
-
-        //reproduce.
 
     }
 
@@ -184,22 +229,9 @@ public class DragonController : MonoBehaviour
             NN.MutateNetwork(NN.mutationAmount, NN.mutationChance);
     }
 
-    [ContextMenu("TestFlapWings")]
-    public void TestFlapWings()
+    public void SetNetwork(Layer[] loadedLayers)
     {
-        //adds impulse force upwards and forward
-        Vector3 upForwardForce = transform.forward + transform.up;
-        rb.AddForce(upForwardForce * 25, ForceMode.Impulse);
-
-        ////adds rotational force depending on what is stronger.
-        //float rotationalForce = rightWingFlapStrength - leftWingFlapStrength;
-        //rb.AddTorque(Vector3.forward * rotationalForce, ForceMode.Impulse);
-    }
-
-    [ContextMenu("TestTorqueX")]
-    public void TestAddTorque()
-    {
-        rb.AddTorque(Vector3.right * 5, ForceMode.Impulse);
+        neuralNetwork.layers = loadedLayers;
     }
 
 }

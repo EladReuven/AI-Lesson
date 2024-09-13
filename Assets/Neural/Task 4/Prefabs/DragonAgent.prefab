@@ -772,6 +772,14 @@ MonoBehaviour:
   distanceFitnessWeight: 10
   orientationFitnessWeight: 2
   angularVelFitnessPenaltyWeight: 5
+  objectDetectionSphereRadius: 10
+  obstacleLayer:
+    serializedVersion: 2
+    m_Bits: 0
+  groundLayer:
+    serializedVersion: 2
+    m_Bits: 0
+  maxGroundCheckDistance: 100
 --- !u!114 &8692328637708616911
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -784,7 +792,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 43b860ef44146aa42b5982e36cbea32f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  inputAmount: 7
+  inputAmount: 9
   outputAmount: 4
   dragonMutateChance: 0.25
   mutationChance: 0.5

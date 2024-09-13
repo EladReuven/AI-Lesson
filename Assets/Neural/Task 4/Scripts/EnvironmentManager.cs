@@ -13,6 +13,7 @@ public class EnvironmentManager : MonoBehaviour
 
     public int amountOfDragons = 5;
     public int amountOfObstacles = 20;
+    //public bool loadFromSave = false;
 
     Vector3 dragonSpawnAreaSize;
     Vector3 obstacleSpawnAreaSize;
@@ -34,6 +35,26 @@ public class EnvironmentManager : MonoBehaviour
     {
         //spawn dragons
         SpawnInitialDragons();
+
+        //if (loadFromSave)
+        //    TryLoadSave();
+    }
+
+    private void TryLoadSave()
+    {
+
+        List<Layer[]> savedLayers = DragonManager.Instance.LoadNetworks(DragonManager.Instance.savesFolderPath);
+
+        if (savedLayers == null)
+            return;
+
+        for (int i = 0; i < amountOfDragons; i++)
+        {
+            if (savedLayers[i] == null)
+                continue;
+            else
+                DragonManager.Instance.dragons[i].SetNetwork(savedLayers[i]);
+        }
     }
 
     private void SpawnInitialDragons()
@@ -54,24 +75,24 @@ public class EnvironmentManager : MonoBehaviour
         return newDragon;
     }
 
-    public DragonController CreateDragon(NeuralNetWithCopyMono.Layer[] layers)
+    public DragonController CreateDragon(Layer[] layers)
     {
         DragonController newDragon = CreateDragon();
 
         newDragon.NN.layers = layers;
         newDragon.MutateDragon();
         return newDragon;
-        
+
     }
 
-    public void SpawnNewGeneration(List<NeuralNetWithCopyMono.Layer[]> topPercentLayers)
+    public void SpawnNewGeneration(List<Layer[]> topPercentLayers)
     {
         for (int i = 0; i < amountOfDragons; i++)
         {
             //pick random layers from list
             int randomLayersIndex = Random.Range(0, topPercentLayers.Count);
 
-            
+
             DragonController newMutatedDragon = CreateDragon(topPercentLayers[randomLayersIndex]);
             DragonManager.Instance.dragons.Add(newMutatedDragon);
         }
